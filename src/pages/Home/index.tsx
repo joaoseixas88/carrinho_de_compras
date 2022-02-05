@@ -5,6 +5,7 @@ import { ProductList } from './styles';
 import { api } from '../../services/api';
 import { formatPrice } from '../../util/format';
 import { useCart } from '../../hooks/useCart';
+import { title } from 'process';
 
 interface Product {
   id: number;
@@ -22,7 +23,7 @@ interface CartItemsAmount {
 }
 
 const Home = (): JSX.Element => {
-  // const [products, setProducts] = useState<ProductFormatted[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
   // const { addProduct, cart } = useCart();
 
   // const cartItemsAmount = cart.reduce((sumAmount, product) => {
@@ -30,12 +31,26 @@ const Home = (): JSX.Element => {
   // }, {} as CartItemsAmount)
 
   useEffect(() => {
-    async function loadProducts() {
+     async function loadProducts() {
       // TODO
-    }
+      await api.get('http://localhost:3333/products')
+      .then(res => {
+        const listProduct = res.data.map((product: ProductFormatted) => {          
+            return(
+              {
+              id: product.id,
+              title: product.title,
+              price: product.price,
+              image: product.image,
+              priceFormatted: formatPrice(product.id)
+              })           
+        })
+        setProducts(listProduct)
+      })
+      }
+    loadProducts()
+  },[]);
 
-    loadProducts();
-  }, []);
 
   function handleAddProduct(id: number) {
     // TODO
@@ -43,13 +58,22 @@ const Home = (): JSX.Element => {
 
   return (
     <ProductList>
-      <li>
+
+      {products.map((product) => {
+        <li>
+          <img src={product.image} alt="" />
+          <strong>{product.title}</strong> 
+          <span>{product.price}</span>
+        </li>
+      })}
+      <li>        
         <img src="https://rocketseat-cdn.s3-sa-east-1.amazonaws.com/modulo-redux/tenis1.jpg" alt="Tênis de Caminhada Leve Confortável" />
         <strong>Tênis de Caminhada Leve Confortável</strong>
         <span>R$ 179,90</span>
         <button
           type="button"
           data-testid="add-product-button"
+          onClick={() => console.log(products)}
         // onClick={() => handleAddProduct(product.id)}
         >
           <div data-testid="cart-product-quantity">
